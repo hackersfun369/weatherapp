@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <title>weather app</title>
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            outline: none;
+            border: 0;
+        }
+        body{
+            display:flex;
+            justify-content: center;
+            align-items: center;
+            background: #06283d;
+        }
+        .container{
+            position: relative;
+            width: 400px;
+            height: 105px;
+            background: white;
+            padding: 28px 32px;
+            overflow: hidden;
+            border-radius: 18px;
+            font-family: 'Courier New', Courier, monospace;
+            transition: 0.6s ease-out;
+        }
+        .searchbox{
+            width: 100%;
+            height: min-content;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .searchbox input{
+            color: #06283d;
+            width: 80%;
+            font-size: 24px;
+            font-weight:500;
+            text-transform: uppercase;
+        }
+        .searchbox input::placeholder{
+            font-size: 20px;
+            font-weight: 500;
+            color: #06283d;
+            text-transform: capitalize;
+        }
+        .searchbox button{
+            cursor: pointer;
+            width: 50px;
+            height: 50px;
+            color: #06283d;
+            background: #dff6ff;
+            border-radius: 50%;
+            font-size: 22px;
+            transition: 0.4s ease;
+        }
+        .searchbox button:hover{
+            color: white;
+            background: #06283d;
+        }
+        .notfound img{
+            width: 250px;
+        }
+        .weather-box{
+            text-align: center;
+        }
+        .weatherbox img{
+            width: 60%;
+            margin-top: 30px;
+        }
+        .weatherbox .temp{
+            position: relative;
+            color: #06283d;
+            font-size: 4rem;
+            font-weight: 800;
+            margin-top: 30px;
+            margin-left: -16px;
+        }
+        .weatherbox .temp span{
+            position: absolute;
+            margin-left: 4px;
+            font-size: 1.5rem;
+        }
+        .weatherbox .description{
+            color: #06283d;
+            font-size: 22px;
+            font-weight: 500;
+            text-transform: capitalize;
+        }
+        .weatherdetails{
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+        .weatherdetails .humidity,.wind{
+            display: flex;
+            align-items: center;
+            width: 50%;
+            height: 100px;
+        }
+        .weatherdetails .humidity{
+            padding-left: 20px;
+            justify-content: flex-start;
+        }
+        .weatherdetails .wind{
+            padding-right: 20px;
+            justify-content: flex-end;
+        }
+        .weatherdetails i{
+            font-size: 26px;
+            margin-right: 10px;
+        }
+        .not-found{
+            text-align: center;
+            margin-top: 50px;
+            scale: 0;
+            opacity: 0;
+            display: none;
+        }
+        .weatherbox,.weatherdetails{
+            scale: 0;
+            opacity: 0;
+        }
+        .fadeIn{
+            animation: 0.5s fadeIn forwards;
+            animation-delay: 0.5s;
+        }
+        @keyframes fadeIn{
+            to{
+                scale: 1;
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="searchbox">
+            <i class="fa-solid fa-location-dot"></i>
+            <input type="text" placeholder="Enter City Name">
+            <button><i class="fa-solid fa-magnifying-glass"></i></button>
+        </div>
+        <div class="notfound">
+            <img src="./404-error.png" alt="">
+            <p>oops! Not Found</p>
+        </div>
+        <div class="weatherbox">
+            <img src="">
+            <p class="temp"></p>
+            <p class="description"></p>
+        </div>
+        <div class="weatherdetails">
+            <div class="humidity">
+                <i class="fa-solid fa-water"></i>
+                <div class="text">
+                    <span></span>
+                    <p>Humidity</p>
+                </div>
+            </div>
+            <div class="wind">
+                <i class="fa-solid fa-wind"></i>
+                <div class="text">
+                    <span></span>
+                    <p>Wind Speed</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const container = document.querySelector('.container');
+        const search = document.querySelector('.searchbox button');
+        const weatherbox = document.querySelector('.weatherbox');
+        const weatherdetails = document.querySelector('.weatherdetails');
+        const error404 = document.querySelector('.notfound');
+    
+        search.addEventListener('click', () => {
+            const apikey = "7b6353e9e63b9186aeaf9881b6dfeeb4";
+            const city = document.querySelector('.searchbox input').value;
+    
+            if (city === '') return;
+    
+            fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apikey}&units=metric`)
+                .then(response => response.json())
+                .then(json => {
+                    if (json.cod === '404') {
+                        container.style.height = '400px';
+                        weatherbox.style.display = 'none';
+                        weatherdetails.style.display = 'none';
+                        error404.style.display = 'block';
+                        error404.classList.add('fadeIn');
+                        return;
+                    }
+    
+                    error404.style.display = 'none';
+                    error404.classList.remove('fadeIn');
+    
+                    const image = document.querySelector('.weatherbox img');
+                    const temp = document.querySelector('.weatherbox .temp');
+                    const description = document.querySelector('.weatherbox .description'); // Corrected variable name
+                    const humidity = document.querySelector('.weatherdetails .humidity span');
+                    const wind = document.querySelector('.weatherdetails .wind span');
+    
+                    switch (json.weather[0].main) {
+                        case 'Clear':
+                            image.src = './sun.png';
+                            break;
+                        case 'Rain':
+                            image.src = './rain.png';
+                            break;
+                        case 'Snow':
+                            image.src = './snow.png';
+                            break;
+                        case 'Clouds':
+                            image.src = './cloud.png';
+                            break;
+                        case 'Haze':
+                            image.src = './fog.png';
+                            break;
+                        default:
+                            image.src = '';
+                    }
+                    temp.innerHTML = `${parseInt(json.main.temp)}<span>°C</span>`;
+                    description.innerHTML = `${json.weather[0].description}`;
+                    humidity.innerHTML = `${json.main.humidity}%`;
+                    wind.innerHTML = `${parseInt(json.wind.speed)}Kmph`;
+    
+                    weatherbox.style.display = '';
+                    weatherdetails.style.display = '';
+                    weatherbox.classList.add('fadeIn');
+                    weatherdetails.classList.add('fadeIn');
+                    container.style.height = '550px';
+                })
+                .catch(error => {
+                    console.error("An error occurred while fetching the weather data:", error);
+                });
+        });
+    </script>
+    
+</body>
+</html>
